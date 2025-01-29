@@ -1,14 +1,13 @@
 try {
-    var trackCode = "PASTE_YOUR_FULL_BASE64_STRING_HERE"; // Replace with your actual Base64
+    var trackCode = "PASTE_YOUR_FULL_BASE64_STRING_HERE"; // Replace with actual Base64
     var trackData = JSON.parse(atob(trackCode));
 
-    if (typeof window.GameManager !== "undefined" && typeof GameManager.loadTrackFromSettings === "function") {
-        GameManager.settings.track = trackData; // Set track data
-        GameManager.loadTrackFromSettings(); // Load the track
-        console.log("✅ Track successfully loaded using GameManager.loadTrackFromSettings!");
+    if (typeof window.GameManager !== "undefined" && typeof GameManager.loadTrack === "function") {
+        GameManager.loadTrack(trackData);
+        console.log("✅ Track loaded instantly into FreeRiderHD editor!");
     } else {
-        console.error("❌ Error: GameManager.loadTrackFromSettings() is not available.");
+        console.error("❌ Error: GameManager.loadTrack() is not available.");
     }
 } catch (error) {
-    console.error("❌ Error decoding track:", error);
+    console.error("❌ Error importing track:", error);
 }
