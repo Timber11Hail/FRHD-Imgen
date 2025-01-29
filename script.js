@@ -62,9 +62,18 @@ function applyEdgeDetection(imageData) {
 
 function copyToClipboard() {
     const output = document.getElementById("output").textContent;
-    navigator.clipboard.writeText(output).then(() => {
-        alert("Base64 copied to clipboard!");
-    }).catch(err => {
-        console.error("Failed to copy: ", err);
-    });
+    
+    if (!output) {
+        alert("No Base64 code to copy!");
+        return;
+    }
+
+    const tempTextArea = document.createElement("textarea");
+    tempTextArea.value = output;
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempTextArea);
+
+    alert("✅ Base64 copied to clipboard!");
 }
