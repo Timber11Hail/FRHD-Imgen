@@ -44,7 +44,7 @@ function processImage(img) {
     };
 
     const trackCode = btoa(JSON.stringify(trackData));
-    document.getElementById("output").textContent = "Generated FreeRiderHD Track Code: " + trackCode;
+    document.getElementById("output").textContent = trackCode;
 }
 
 function applyEdgeDetection(imageData) {
@@ -58,4 +58,13 @@ function applyEdgeDetection(imageData) {
     }
     
     return { data: edges, width, height };
+}
+
+function copyToClipboard() {
+    const output = document.getElementById("output").textContent;
+    navigator.clipboard.writeText(output).then(() => {
+        alert("Base64 copied to clipboard!");
+    }).catch(err => {
+        console.error("Failed to copy: ", err);
+    });
 }
