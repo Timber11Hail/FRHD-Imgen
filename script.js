@@ -1,6 +1,7 @@
+document.getElementById("imageInput").addEventListener("change", convertImageToTrack);
+
 async function convertImageToTrack() {
     const fileInput = document.getElementById('imageInput');
-    const output = document.getElementById("output");
     if (!fileInput.files.length) {
         alert("Please select an image");
         return;
@@ -8,16 +9,8 @@ async function convertImageToTrack() {
 
     const file = fileInput.files[0];
     const img = new Image();
+    img.onload = () => processImage(img);
     img.src = URL.createObjectURL(file);
-
-    img.onload = function() {
-        URL.revokeObjectURL(img.src);
-        processImage(img);
-    };
-
-    img.onerror = function() {
-        output.textContent = "Error loading image. Please try a different file.";
-    };
 }
 
 function processImage(img) {
@@ -28,7 +21,7 @@ function processImage(img) {
     ctx.drawImage(img, 0, 0);
 
     const imageData = ctx.getImageData(0, 0, img.width, img.height);
-    const edges = applyEdgeDetection(imageData);
+    const edges = applySobelEdgeDetection(imageData);
 
     let trackLines = [];
     for (let y = 0; y < edges.height; y++) {
@@ -50,4 +43,35 @@ function processImage(img) {
 
     const trackCode = btoa(JSON.stringify(trackData));
     document.getElementById("output").textContent = "Generated FreeRiderHD Track Code: " + trackCode;
+}
+
+function applySobelEdgeDetection(imageData) {
+    const width = imageData.width;
+    const height = imageData.height;
+    const grayData = new Uint8Array(width * height);
+
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        let avg = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+        grayData[i / 4] = avg;
+    }
+
+    const sobelData = new Uint8Array(width * height);
+    const sobelX = [-1, 0, 1, -2, 0, 2, -1, 0, 1];
+    const sobelY = [-1, -2, -1, 0, 0, 0, 1, 2, 1];
+
+    for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+            let gx = 0, gy = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    let pixelVal = grayData[(y + i) * width + (x + j)];
+                    gx += sobelX[(i + 1) * 3 + (j + 1)] * pixelVal;
+                    gy += sobelY[(i + 1) * 3 + (j + 1)] * pixelVal;
+                }
+            }
+            let magnitude = Math.sqrt(gx * gx + gy * gy);
+            sobelData[y * width + x] = magnitude > 128 ? 255 : 0;
+        }
+    }
+    return { data: sobelData, width, height };
 }
