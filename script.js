@@ -17,19 +17,22 @@ function processImage(img) {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     
-    // Scale image down to 8x8 before processing
-    canvas.width = 8;
-    canvas.height = 8;
-    ctx.drawImage(img, 0, 0, 8, 8);
+    // Scale image down even further to 6x6 pixels
+    canvas.width = 6;
+    canvas.height = 6;
+    ctx.drawImage(img, 0, 0, 6, 6);
 
-    const imageData = ctx.getImageData(0, 0, 8, 8);
+    const imageData = ctx.getImageData(0, 0, 6, 6);
     const edges = applyEdgeDetection(imageData);
 
     let trackLines = [];
     for (let y = 0; y < edges.height; y++) {
         for (let x = 0; x < edges.width; x++) {
             if (edges.data[y * edges.width + x] === 255) {
-                trackLines.push({ x1: x, y1: y, x2: x + 1, y2: y + 1 });
+                // Add fewer lines by only storing every other pixel
+                if (x % 2 === 0 && y % 2 === 0) {
+                    trackLines.push({ x1: x, y1: y, x2: x + 1, y2: y + 1 });
+                }
             }
         }
     }
